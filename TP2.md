@@ -151,7 +151,7 @@ db.ecommerce_produits.find({
 db.ecommerce_produits.find({
     avis: {
     $elemMatch: {
-      note: { $gt: 5 }
+      note: { $gte: 5 }
     }
   }
 })
@@ -162,6 +162,9 @@ db.ecommerce_produits.find({
 
 ```
 
+db.ecommerce_produits.find({"categorie": "Vetements"})
+    .sort({ prix: -1 })
+    .limit(5)
 
 
 ```
