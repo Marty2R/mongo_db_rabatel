@@ -228,3 +228,37 @@ db.livres.updateOne(
 )
 
 ```
+
+## Partie 4 :
+
+### Suppression de documents (Delete)
+
+#### 4.1 Supprimez un livre spécifique par son titre :
+
+```
+
+db.livres.deleteOne(
+    { titre: "Le Petit Prince 2" }
+)
+
+```
+
+#### 4.2 Supprimez tous les livres d'un auteur spécifique :
+
+```
+
+db.livres.deleteMany(
+    { auteur: "George Orwell" }
+)
+
+```
+
+#### 4.3 Supprimez un utilisateur par son email :
+
+```
+
+db.utilisateur.deleteOne(
+    { email: "test-email@random-email.com" }
+)
+
+```
