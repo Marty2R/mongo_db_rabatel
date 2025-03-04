@@ -115,7 +115,7 @@ db.ecommerce_produits.updateMany({
 
 ```
 
-
+db.ecommerce_produits.updateOne({ name: "sweat" }, {$inc: { stock: -1} })
 
 ```
 
@@ -139,7 +139,7 @@ db.ecommerce_produits.find({
 
 db.ecommerce_produits.find({
     "categorie": "Vetements",
-    stock: { $gt: 5 }
+    stock: { $lt: 5 }
 })
 
 ```
@@ -165,6 +165,5 @@ db.ecommerce_produits.find({
 db.ecommerce_produits.find({"categorie": "Vetements"})
     .sort({ prix: -1 })
     .limit(5)
-
 
 ```

@@ -188,8 +188,8 @@ db.livres.updateMany(
 
 ```
 
-db.utilisateur.updateMany(
-
+db.utilisateur.updateOne( {
+    name: "Dupont" }, { $set:  }
 )
 
 ```
@@ -198,9 +198,30 @@ db.utilisateur.updateMany(
 
 ```
 
-db.utilisateur.updateMany(
+db.utilisateurs.updateMany(
     { nom : "Dupont" },
-    { $set: { adresse.rue : "42 Quais Perrache" } }
+    { $set: { "adresse.rue" : "42 Quais Perrache" } }
 )
+
+```
+
+#### 3.6 Ajoutez un nouveau tag à un utilisateur :
+
+```
+
+db.utilisateurs.updateOne(
+    { nom: "Dupont" },
+    { $addToSet: { tags: "Horreur" } }
+)
+
+```
+
+> note : $addToSet : Ajoute au tableau sauf si valeur deja present.
+
+#### 3.7 Mettez à jour la note moyenne d'un livre :
+
+```
+
+
 
 ```
