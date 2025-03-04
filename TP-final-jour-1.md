@@ -222,6 +222,9 @@ db.utilisateurs.updateOne(
 
 ```
 
-
+db.livres.updateOne(
+    { titre: "Le Petit Prince 2" },
+    { $set: { note_moyenne: 5 } }
+)
 
 ```
