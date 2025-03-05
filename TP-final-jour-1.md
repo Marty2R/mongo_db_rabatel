@@ -257,8 +257,124 @@ db.livres.deleteMany(
 
 ```
 
-db.utilisateur.deleteOne(
+db.utilisateurs.deleteOne(
     { email: "test-email@random-email.com" }
 )
 
 ```
+
+## Partie 5
+
+### Requêtes avancées et projection :
+
+#### 5.1 Listez tous les livres triés par note moyenne (ordre décroissant) :
+
+```
+
+db.livres.find({}).sort({ note_moyenne: 1 })
+
+```
+
+#### 5.2 Trouvez les 3 livres les plus anciens :
+
+```
+
+db.livres.find({}).sort({ annee_publication: 1 }).limit(3)
+
+```
+
+#### 5.3 Comptez le nombre de livres par auteur :
+
+```
+
+db.livres.aggregate([
+    { $group: { _id: "$auteur", count: { $sum: 1 } } }
+])
+
+
+```
+
+#### 5.4 Affichez uniquement le titre, l'auteur et la note moyenne des livres (sans l'id) :
+
+```
+
+db.livres.aggregate([
+    { $project: { _id: 0, titre: 1, auteur: 1, note_moyenne: 1 } }
+])
+
+```
+
+#### 5.5 Trouvez les utilisateurs qui ont emprunté plus d'un livre :
+
+```
+
+
+
+```
+
+## Partie 6 : 
+
+### Modélisation de données (Mini-exercice) : 
+
+#### 6.1 Modèle embarqué vs référence : 
+
+##### 6.1.1 Créez une nouvelle collection `emprunts` qui utilise des références vers les livres et les utilisateurs : 
+
+```
+
+db["emprunts"].insertMany([
+    {
+        utilisateur_id: ObjectId("67c6b81fc75697932d43b45e"),
+        livre_id: ObjectId("67c6b6a153ee5b576572eb16"),
+        date_emprunt: new Date("2023-02-20"),
+        date_retour_prevue: new Date("2023-03-20"),
+        date_retour_effective: null,
+        statut: "en cours"
+    }
+])
+
+```
+
+##### 6.1.2 Insérez au moins 3 emprunts dans cette collection : 
+
+```
+
+db["emprunts"].insertMany([
+    {
+        utilisateur_id: ObjectId("67c6b81fc75697932d43b45e"),
+        livre_id: ObjectId("67c6b6a153ee5b576572eb16"),
+        date_emprunt: new Date("2023-02-20"),
+        date_retour_prevue: new Date("2023-03-20"),
+        date_retour_effective: null,
+        statut: "en cours"
+    }
+])
+
+```
+
+##### 6.1.3 Comparez cette approche avec celle où les emprunts sont directement intégrés dans le document utilisateur : 
+
+```
+
+db.utilisateurs.updateOne(
+    { nom: "Dupont" },
+    { $push: { livres_empruntes: { livre_id: ObjectId("67c6b6a153ee5b576572eb16"), date_emprunt: new Date("2023-02-20"), date_retour_prevue: new Date("2023-03-20"), date_retour_effective: null, statut: "en cours" } } }
+)
+
+```
+
+#### 6.2 Réflexion sur la modélisation
+
+##### 6.2.1 Quels sont les avantages et inconvénients de chaque approche ? : 
+
+- Avantages : Moins de duplications et plus facile à mettre à jour. Si un livre change, nous ne sommes pas obligés de modifier tous les emprunts associés.
+
+- Inconvénient : On doit faire des jointures ou utiliser des aggrégations pour récupérer des données. (Requête plus complexe)
+
+##### 6.2.2 Quelle approche privilégieriez-vous pour une application réelle et pourquoi ? : 
+
+- Il vaut mieux privilégier l'approche avec une collection "emprunts", car elle est plus flexible et permet de mieux gérer ses données pour une mise en production.
+
+##### 6.2.3 Comment modéliseriez-vous les cas où un même livre peut exister en plusieurs exemplaires ? : 
+
+- Il faudrait créer une collection "exemplaires" qui fait référence à chaque livre. Puis ensuite lier les emprunts à des exemplaires spécifiques.
