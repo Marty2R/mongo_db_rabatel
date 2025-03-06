@@ -54,3 +54,26 @@ Collection est un équivalant d'une table
 password : eABFKskjLRvfaz13
 
 mongodb+srv://martyrabatel2:eABFKskjLRvfaz13@cluster0.sgzft.mongodb.net/
+
+## L'agrégation : 
+
+- L'agrégation est un mécanisme puissant dans MongoDB qui permet de transformer, filtrer et regrouper des données dans une collection de manière avancée. Chaque "étape" (ou stage en anglais) dans le pipeline d'agrégation effectue une opération particulière sur les données.
+
+- Exemple : 
+
+```
+
+db.livres.aggregate([
+  { 
+    $group: {
+      _id: "$genre",  // Grouper par genre
+      nombre_de_livres: { $sum: 1 },  // Nombre de livres par genre
+      note_moyenne: { $avg: "$note_moyenne" },  // Moyenne des notes par genre
+      prix_moyenne: { $avg: "$prix" },  // Moyenne des prix par genre
+      prix_min: { $min: "$prix" },  // Prix minimum par genre
+      prix_max: { $max: "$prix" }   // Prix maximum par genre
+    }
+  }
+])
+
+```

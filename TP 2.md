@@ -61,8 +61,6 @@ db.livres.find({
 
 ### 1.1.3 : 
 
-|   Question   |   Commande |   Resultat |
-|---    |:-:    |:-:    |:-:    |--:    |
 |   Nombre de documents examinés   |   db.livres.find({ prix: { $gt: 25 } }).explain("executionStats")   |  1010  |
 
 ## Exercice 1.2 : 
@@ -75,3 +73,193 @@ db.livres.createIndex({ titre: 1 })
 
 ```
 
+# TP 3 : 
+
+## 3.1 : 
+
+### 1. Créez une pipeline d'agrégation pour calculer les statistiques par genre : 
+
+```
+
+db.livres.aggregate([
+  { 
+    $group: {
+      _id: "$genre",
+      nombre_de_livres: { $sum: 1 },
+      note_moyenne: { $avg: "$note_moyenne" },
+      prix_moyenne: { $avg: "$prix" },
+      prix_min: { $min: "$prix" },
+      prix_max: { $max: "$prix" } 
+    }
+  }
+])
+
+
+```
+
+### 2. Analysez la répartition des lires par éditeur : 
+
+```
+
+db.livres.aggregate([
+  { 
+    $group: {
+      _id: "$editeur",
+      nombre_de_livres: { $sum: 1 },
+      auteur: { $sum: 1 },
+      genre: { $sum: 1 },
+      note_moyenne: { $avg: "$note_moyenne" },
+    }
+  }
+])
+
+
+```
+
+### 3. Enrichissez votre collection d'utilisateurs avec des données d'emprunt si ce n'est pas deja fait, puis créez une pipeline d'agrégation pour analyser les habitudes d'emprunt par ville d'utilisateur : 
+
+```
+
+db.emprunts.aggregate([
+  { 
+    $group: {
+      _id: "$ville",
+      total_emprunts: { $sum: 1 },
+      total_livres_empruntes: { $sum: 1 },
+      dates_emprunt: { $push: "$date_emprunt" },
+    }
+  },
+  { 
+    $project: {
+      _id: 1,
+      total_emprunts: 1,
+      total_livres_empruntes: 1,
+      dates_emprunt: { $size: "$dates_emprunt" },
+    }
+  }
+])
+
+```
+
+## 3.2 : 
+
+### 1. Analysez les durées d'emprunt en calculant la durée moyenne, la durée minimale et maximale et le % d'enprunt retourné en retard : 
+
+```
+
+
+
+```
+
+### 2. Utilisez l'opérateur $lookup pour joindre les collections livres et utilisateurs afin d'analyser quels livres sont les plus empruntés et par qui : 
+
+```
+
+db.emprunts.aggregate([
+  {
+    $lookup: {
+      from: "livres",
+      localField: "livre_id", 
+      foreignField: "_id", 
+      as: "livre_details" 
+    }
+  },
+  {
+    $lookup: {
+      from: "utilisateurs",  
+      localField: "utilisateur_id", 
+      foreignField: "_id", 
+      as: "utilisateur_details" 
+    }
+  },
+  {
+    $unwind: "$livre_details"
+  },
+  {
+    $unwind: "$utilisateur_details"
+  },
+  {
+    $group: {
+      _id: "$livre_details.titre",  // Regrouper par le titre du livre
+      nombre_emprunts: { $sum: 1 },  // Compter le nombre d'emprunts pour chaque livre
+      utilisateurs: { $addToSet: "$utilisateur_details.nom" }  // Ajouter les noms des utilisateurs ayant emprunté ce livre
+    }
+  },
+])
+
+```
+
+### 3. utilisez l'opérateur $facet pour créer un tableau de bord complet avec plusieurs analyses en une suel pipeline : 
+
+- Statistiques globales ( nombre total delivres, prix moyen, notes moyenne )
+- Top 5 des livres les mieux notés
+- Repartition par langue
+- Répartition par décennie de publication
+
+```
+
+db.livres.aggregate([
+  {
+    $facet: {
+      statistiques_globales: [
+        {
+          $group: {
+            _id: null,
+            nombre_de_livres: { $sum: 1 },
+            prix_moyen: { $avg: "$prix" },
+            note_moyenne: { $avg: "$note_moyenne" }
+          }
+        }
+      ],
+      
+      top_5_livres_notes: [
+        { $sort: { note_moyenne: -1 } },
+        { $limit: 5 },  
+        {
+          $project: {
+            titre: 1,
+            note_moyenne: 1
+          }
+        }
+      ],
+      
+      repartition_par_langue: [
+        {
+          $group: {
+            _id: "$langue",
+            nombre_de_livres: { $sum: 1 }
+          }
+        },
+        { $sort: { nombre_de_livres: -1 } } 
+      ],
+      
+      repartition_par_decennie: [
+        {
+          $project: {
+            titre: 1,
+            decade: { $floor: { $divide: [{ $year: "$date_publication" }, 10] } }
+          }
+        },
+        {
+          $group: {
+            _id: "$decade",
+            nombre_de_livres: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ]
+    }
+  }
+])
+
+```
+
+## 3.3 : 
+
+### 1. Créez un système de recommandation basique qui suggère des livres à un utilisateur en fonction des genres qu'il à deja empruntés : 
+
+```
+
+
+
+```
