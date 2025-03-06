@@ -61,7 +61,13 @@ db.livres.find({
 
 ### 1.1.3 : 
 
-|   Nombre de documents examinés   |   db.livres.find({ prix: { $gt: 25 } }).explain("executionStats")   |  1010  |
+| Requête | Temps avant indexation | Temps après indexation | Nombre de documents examinés|
+|---------------------------------------------|-----------------------|----------------------------------|
+| Recherche par prix et note minimale         | < 1ms                 | < 1ms                            |  53             
+| Recherche par genre et langue               | < 1ms                 | < 1ms                            |  61
+| Recherche de texte sur titre et description | < 1ms                 | < 1ms                            |  82
+| Recherche avec index sur ISBN               | < 1ms                 | < 1ms                            |  1
+| Recherche de livres disponibles             | < 1ms                 | < 1ms                            |  542
 
 ## Exercice 1.2 : 
 
@@ -72,6 +78,79 @@ db.livres.find({
 db.livres.createIndex({ titre: 1 })
 
 ```
+
+### Créez une collection livraisons : 
+
+```
+db.livraisons.insertOne(
+  {
+    utilisateur_id: ObjectId("67c7523ac13133e1feb21e6a"), 
+    livre_id: ObjectId("67c71dbfd68f87729363ae53"),
+    depart: {
+      type: "Point",
+      coordinates: [4.8557, 45.758] 
+    },
+    arrivee: {
+      type: "Point",
+      coordinates: [2.35, 48.85] 
+    },
+    position_actuelle: {
+      type: "Point",
+      coordinates: [2.351, 48.8602] 
+    },
+    itineraire: {
+      type: "LineString",
+      coordinates: [
+        [2.3522, 48.8566], 
+        [2.3510, 48.8585],
+        [2.3505, 48.8600],
+        [2.3499, 48.8641]
+      ]
+    },
+    statut: "En cours",
+    date_livraison: ISODate("2025-03-05T10:30:00Z") 
+  }
+);
+
+```
+
+### Implémentez une fonction pour mettre à jour la position d'une livraison.
+
+```
+function updatePositionLivraison(livraisonId, nouvellePosition) {
+  db.livraisons.updateOne(
+    { _id: ObjectId("67c7ebce75599966318d30be") }, 
+    { 
+      $set: {
+        position_actuelle: {
+          type: "Point",
+          coordinates: [2.33,48.83]
+        }
+      }
+    }
+  );
+}
+
+```
+
+### Créez une requête pour trouver toutes les livraisons en cours dans un rayon de 1km autour d'un point
+donné.
+
+```
+db.livraisons.find({
+  position_actuelle: {
+    $near: {
+      $geometry: {
+        type: "Point",
+        coordinates: [4.8557,45.758] 
+      },
+      $maxDistance: 1000, 
+    }
+  }
+});
+
+```
+
 
 # TP 3 : 
 
